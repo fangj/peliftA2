@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>PELiftA2</title>
+	<script src="ramda.min.js"></script>
+	<script src="data.either.umd.min.js"></script>
+</head>
+<body>
+	<script>
+
+	//use Either
+		const Either=folktale.data.Either;
+
+		const right=x=>Either.Right(x);
+		const left=x=>{console.error(x); return Either.Left(x)};
+
+		function peliftA2(fn,p1,p2){
+			const _fn=R.curry(fn)
+			const _p1=p1.then(right,left);
+			const _p2=p2.then(right,left);
+			Promise.all([_p1,_p2]).then(([a1,a2])=>Either.of(_fn).ap(a1).ap(a2))
+		}
+
+     //example
+		var p1=new Promise(function(ful,rej){
+			setTimeout(ful,1000,"p1");
+		});
+		var p2=new Promise(function(ful,rej){
+			setTimeout(ful,2000,"p2");
+		});
+		var p3=new Promise(function(ful,rej){
+			setTimeout(rej,600,"p3 rej");
+		});
+
+		function renderPage(p1,p2) {
+			console.log(p1,p2)
+			return "render ok"
+		}
+
+
+		peliftA2(renderPage,p1,p2); //renderPage run
+		peliftA2(renderPage,p1,p3); //renderPage not run because p3 reject
+
+
+
+	</script>
+</body>
+</html>
